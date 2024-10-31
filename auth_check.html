@@ -1,0 +1,165 @@
+---
+title: Mini Wallet | Hito
+---
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hito Wallet Authenticity Check</title>
+    <!-- Include Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome CSS -->
+  <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      crossorigin="anonymous"
+  />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+
+  <!-- Include jQuery (for simplicity in handling events) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    /* Custom styles for the autocomplete dropdown */
+    .autocomplete {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    .autocomplete-items {
+      position: absolute;
+      border: 1px solid #ddd;
+      border-top: none;
+      z-index: 99;
+      /* Position the autocomplete items to be the same width as the container: */
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #fff;
+    }
+    .autocomplete-item {
+      padding: 10px;
+      cursor: pointer;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+    .autocomplete-item:hover {
+      background-color: #f1f1f1;
+    }
+    .is-hidden {
+      display: none;
+    }
+    .network .level {
+      margin-bottom: 0.5em;
+    }
+    code {
+      white-space: break-spaces;
+      word-break: break-all;
+    }
+    .is-disabled {
+      pointer-events: none; /* Disable clicking */
+      opacity: 0.6;         /* Visual cue for being disabled */
+      cursor: not-allowed;  /* Show not-allowed cursor */
+    }
+    .image-30 img {
+      height: 40vh; /* 30% of the viewport height */
+      object-fit: contain;
+      margin-top: -1em;
+      margin-bottom: 0em;
+    }
+
+  </style>
+</head>
+<body>
+
+<section class="section">
+  <div class="container">
+    <h1 class="title">Hito Wallet Authenticity Check</h1>
+    <p class="subtitle">Verify the authenticity of your device's firmware and hardware.</p>
+    <div class="image is-centered image-30">
+        <!-- Placeholder for animation image -->
+        <img src="./img/auth-animation.gif" alt="Unlock and navigate to menu animation">
+    </div>
+
+    <p>To verify the authenticity of your device's firmware and hardware, select either NFC or Bluetooth. <br/>
+       The server will generate a token, and your device will sign it. <br/>
+       Once signed, your device will display a QR code. <br/><br/>
+
+       After scanning the QR code from the device, you will be navigated to auth.hito.xyz to complete the authenticity check.
+      </p>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="field pt-3">
+      <div class="control">
+        <input type="hidden" id="authURL" />
+        <button type="submit" class="button is-info js-auth-ble">
+            Send via BLE
+            &nbsp;<i class="fab fa-bluetooth"></i>
+        </button>
+        <button type="submit" class="button is-success js-auth-nfc">
+            Send via NFC
+            &nbsp;<i style="display: inline-block; transform: rotate(90deg);" class="fas fa-wifi"></i>
+        </button>
+        <button id="scan-to-complete" type="submit" class="button is-primary js-scan is-hidden js-qrscanner-trigger" data-target="authURL">
+            Scan to Complete
+            <!--
+            &nbsp;<i class="fas fa-qrcode"></i>
+            -->
+        </button>
+        <button type="submit" class="button is-hidden js-cancel">
+            Cancel
+        </button>
+      </div>
+      <div class="secti2on console-output is-small is-size-7 pt-4">
+        <pre><code class="json" id="log"></code></pre>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<div id="video-modal" class="modal">
+  <div class="modal-background"></div>
+  <div class="modal-content" style="width: 90%; margin: auto">
+    <!-- Video Element -->
+    <div id="qr-reader" style="width: 100%; height: auto;"></div>
+  </div>
+  <button class="modal-close is-large" aria-label="close"></button>
+</div>
+
+<div class="modal" id="resultModal">
+  <div class="modal-background"></div>
+  <div class="modal-card p-4">
+    <header class="modal-card-head">
+      <p class="modal-card-title" id="modalTitle">Authenticity check</p>
+      <a class="delete" aria-label="close" id="closeModal"></a>
+    </header>
+    <section class="modal-card-body" id="modalContent">
+      <!-- Content will be inserted here -->
+      Loading ...
+    </section>
+    <footer class="modal-card-foot">
+      <a class="button is-loading" id="closeButton">Close</a>
+    </footer>
+  </div>
+</div>
+
+<!-- Include JavaScript -->
+{% assign cacheBust = site.time | date:'?v=%s' %}
+<script src={{ "js/auth_check.js" | append: cacheBust }}></script>
+<script src={{ "js/hito.js" | append: cacheBust }}></script>
+<script src={{ "js/send.js" | append: cacheBust }}></script>
+  <script src={{ "js/log.js" | append: cacheBust }}></script>
+  <script src={{ "js/bluetooth.js" | append: cacheBust }}></script>
+  <script src={{ "js/nfc.js" | append: cacheBust }}></script>
+  <script src={{ "js/scanaddress.js" | append: cacheBust }}></script>
+
+</body>
+</html>
+

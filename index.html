@@ -1,1 +1,457 @@
-index
+---
+title: Mini Wallet | Hito
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Wallet | Hito</title>
+  <!-- Include Bulma CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+  >
+  <!-- Font Awesome CSS -->
+  <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      crossorigin="anonymous"
+  />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+
+  <!-- Include jQuery (for simplicity in handling events) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.12.1/web3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+
+
+
+  {% assign cacheBust = site.time | date:'?v=%s' %}
+  <script src={{ "js/networks.js" | append: cacheBust }}></script>
+  <script src={{ "js/scanaddress.js" | append: cacheBust }}></script>
+  <script src={{ "js/localstorage.js" | append: cacheBust }}></script>
+  <script src={{ "js/send.js" | append: cacheBust }}></script>
+  <script src={{ "js/log.js" | append: cacheBust }}></script>
+  <script src={{ "js/bluetooth.js" | append: cacheBust }}></script>
+  <script src={{ "js/nfc.js" | append: cacheBust }}></script>
+  <script src={{ "js/tokens.js" | append: cacheBust }}></script>
+  <script src={{ "js/evm_tx_create.js" | append: cacheBust }} type="module"></script>
+  <script src={{ "js/hito.js" | append: cacheBust }}></script>
+
+  <style>
+    /* Custom styles for the autocomplete dropdown */
+    .autocomplete {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    .autocomplete-items {
+      position: absolute;
+      border: 1px solid #ddd;
+      border-top: none;
+      z-index: 99;
+      /* Position the autocomplete items to be the same width as the container: */
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #fff;
+    }
+    .autocomplete-item {
+      padding: 10px;
+      cursor: pointer;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+    .autocomplete-item:hover {
+      background-color: #f1f1f1;
+    }
+    .is-hidden {
+      display: none;
+    }
+    .network .level {
+      margin-bottom: 0.5em;
+    }
+    code {
+      white-space: break-spaces;
+      word-break: break-all;
+    }
+    .is-disabled {
+      pointer-events: none; /* Disable clicking */
+      opacity: 0.6;         /* Visual cue for being disabled */
+      cursor: not-allowed;  /* Show not-allowed cursor */
+    }
+    .image-30 img {
+      height: 40vh; /* 30% of the viewport height */
+      object-fit: contain;
+      margin-top: -1em;
+      margin-bottom: 0em;
+    }
+
+  </style>
+</head>
+<body>
+
+  <section class="section">
+    <div class="container">
+      <h1 class="title">Hito Mini &mdash;
+        <span class="content-tab is-hidden js-tabAuth">Autheticity Check</span>
+        <span class="content-tab is-hidden js-tabTxBasic">Basic Transaction</span>
+        <span class="content-tab is-hidden js-tabTxErc20">Token Transfer</span>
+        <span class="content-tab is-hidden js-tabSignMessage">Sign Message</span>
+
+      </h1>
+
+      <!-- Transaction Type Tabs -->
+      <div class="tabs is-tog2gle is-f2ullwidth is-small mt-5 mb-3 pl-0 pr-0">
+        <ul class="is-flex is-justify-content-space-between">
+          <ul style="border: 0">
+            <li class="is-active" data-tab="js-tabTxBasic" class="">
+              <a>
+                <i class="fab fa-ethereum"></i>
+                &nbsp;
+                &nbsp;
+                <span>Basic</span>
+              </a>
+            </li>
+            <li data-tab="js-tabTxErc20" class="">
+              <a>
+                <i class="fas fa-coins"></i>
+                &nbsp;
+                &nbsp;
+                <span>Token</span>
+              </a>
+            </li>
+            <li data-tab="js-tabSignMessage" class="">
+              <a>
+                <i class="fas fa-signature"></i>
+                &nbsp;
+                &nbsp;
+                <span>Message</span>
+              </a>
+            </li>
+          </ul>
+          <!--
+          <li data-tab="js-tabSettings" class="">
+            <a>
+              &nbsp;
+              <i class="fas fa-cog"></i>
+              &nbsp;
+            </a>
+          </li>
+          -->
+          <li data-tab="js-tabAuth" class="">
+            <a>
+              &nbsp;
+              <i class="fas fa-shield-alt"></i>
+              &nbsp;
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="b2ox mb-5 content-tab js-tabTxBasic js-tabTxErc20 js-tabSignMessage" sty2le="border: 1px solid #dbdbdb; border-top-left-radius: 0; border-top-right-radius: 0; border-top: none; margin-top: -1px;">
+        <!-- Wallet Address -->
+        <div class="field js-form-web3-address mb-0 content-tab js-tabTxErc20 js-tabTxBasic js-tabSignMessage">
+            <label class="label" for="fromAddressBasic">Hito address</label>
+          <div class="field has-addons mb-0">
+            <div class="control is-expanded">
+              <input type="text" class="input select-on-focus js-localstorage" id="walletAddress" placeholder="Enter or scan wallet's address" data-1p-ignore spellcheck="false">
+            </div>
+            <div class="control">
+              <button class="button qrcode-button js-qrscanner-trigger" data-target="walletAddress">
+                <i class="fas fa-qrcode"></i>
+              </button>
+            </div>
+          </div>
+          <div class="is-flex is-justify-content-space-between">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a valid hito wallet address</p>
+            <p class="is-size-7">&nbsp;</p>
+          </div>
+        </div>
+        <!-- Modified Field with Label and Checkbox on the Same Line -->
+        <div class="field content-tab js-tabTxErc20 js-tabTxBasic js-tabSignMessage">
+          <div class="is-flex is-justify-content-space-between">
+            <label class="label">Network</label>
+          </div>
+          <div class="control autocomplete is-loading">
+            <input type="text" id="networkSearch" class="input select-on-focus" placeholder="Start typing network name or ID..." autocomplete="off" data-1p-ignore spellcheck="false">
+            <div id="autocomplete-list" class="autocomplete-items is-hidden"></div>
+          </div>
+          <div class="is-flex is-justify-content-space-between js-example">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a valid network</p>
+            <p/>
+              <p class="is-size-7">for example: 
+                <a href="#" onclick="return false">Ethereum mainnet</a>,
+                <a href="#" onclick="return false">Gnosis</a>,
+                <a href="#" onclick="return false">Polygon mainnet</a>,
+                <a href="#" onclick="return false">Base</a>
+              </p>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="form-divider mb-2 content-tab js-tabTxErc20">
+
+        <!-- Message Text -->
+        <div class="field mb-4 content-tab js-tabSignMessage js-form-text">
+          <label class="label" for="messageText">Message Text</label>
+          <div class="field mb-0">
+            <div class="control is-expanded">
+              <input type="text" class="input select-on-focus js-localstorage" id="messageText" placeholder="Enter message text" data-1p-ignore spellcheck="false">
+            </div>
+          </div>
+          <div class="is-flex is-justify-content-space-between">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a message text</p>
+            <p class="is-size-7">&nbsp;</p>
+          </div>
+        </div>
+
+        <!-- Token Selection -->
+        <div class="field is-hidden content-tab js-tabTxErc20 mb-0">
+          <label class="label" for="tokenSelect">Token</label>
+          <div class="control">
+            <div class="control has-icons-left autocomplete">
+              <input type="text" id="tokenSearch" class="input select-on-focus js-localstorage" placeholder="Start typing token name or contract address..." autocomplete="off" data-1p-ignore spellcheck="false">
+              <span class="icon is-small custom-icon is-left is-hidden">
+                <img class="image is-24x24" src="https://ethereum-optimism.github.io/data/USDC/logo.png" alt="Custom Icon">
+              </span>
+              <span class="icon is-small is-left js-default">
+                <i class="fas fa-gem"></i>
+              </span>
+              <div id="autocomplete-token-list" class="autocomplete-items is-hidden"></div>
+            </div>
+          </div>
+          <div class="is-flex is-small is-justify-content-space-between js-example">
+            <p/>
+              <p class="is-size-7">for example: 
+                <a href="#" onclick="return false">USDC</a>,
+                <a href="#" onclick="return false">EURC</a>,
+                <a href="#" onclick="return false">USDT</a>,
+                <a href="#" onclick="return false">Tether</a>
+              </p>
+          </div>
+        </div>
+        <!-- Contract Address -->
+        <div class="field is-hidden content-tab js-tabTxErc20 js-form-web3-address">
+          <label class="label" for="contractAddress">Contract Address</label>
+          <div class="control">
+            <input type="text" class="input select-on-focus js-localstorage" id="contractAddress" placeholder="Enter ERC20 contract address" spellcheck="false">
+          </div>
+          <div class="is-flex is-justify-content-space-between">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a valid contract address</p>
+            <p class="is-size-7">&nbsp;</p>
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="form-divider mb-2 content-tab js-tabTxErc20 js-tabTxBasic">
+
+        <div class="field js-form-web3-address mb-0 content-tab js-tabTxErc20 js-tabTxBasic">
+          <!-- To Address -->
+          <label class="label" for="toAddressBasic">To Address</label>
+          <div class="field has-addons mb-0">
+            <div class="control is-expanded">
+              <input type="text" class="input select-on-focus js-localstorage" id="toAddressBasic" placeholder="Enter or scan recipient's address or ENS" data-1p-ignore spellcheck="false">
+            </div>
+            <div class="control">
+              <button class="button qrcode-button js-qrscanner-trigger" data-target="toAddressBasic">
+                <i class="fas fa-qrcode"></i>
+              </button>
+            </div>
+          </div>
+          <div class="is-flex is-justify-content-space-between">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a valid recipient address</p>
+            <p class="is-size-7">&nbsp;</p>
+          </div>
+        </div>
+
+        <!-- Value (ETH) -->
+        <div class="field content-tab js-tabTxBasic js-form-number">
+          <div class="is-flex is-justify-content-space-between">
+            <label class="label" for="valueEth">Value (<span class="js-native-currency">ETH</span>)</label>
+            <a class="js-balance is-hidden" href="#">Balance: </a>
+          </div>
+          <div class="control">
+            <input type="number" step="any" class="input select-on-focus js-native-currency js-localstorage" id="valueEth" data-placeholder="Enter amount in " placeholder="Enter amount in ETH" autocomplete="off" data-1p-ignore spellcheck="false">
+          </div>
+          <div class="is-flex is-justify-content-space-between">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a valid value</p>
+            <p class="is-size-7">&nbsp;</p>
+          </div>
+        </div>
+
+        <!-- Value (Tokens) -->
+        <div class="field content-tab js-tabTxErc20 js-form-number is-hidden">
+          <div class="is-flex is-justify-content-space-between">
+            <label class="label" for="tokenValue">
+              Value (Tokens<span class="js-decimals"></span>)
+            </label>
+            <a class="js-balance-tokens is-hidden" href="#">Balance: 0.0</a>
+          </div>
+          <div class="control">
+            <input type="number" step="any" class="input select-on-focus js-localstorage" id="tokenValue" placeholder="Enter token amount" spellcheck="false">
+          </div>
+          <div class="is-flex is-justify-content-space-between">
+            <p class="help is-danger is-hidden mt-0 ml-3">Enter a valid value</p>
+            <p class="is-size-7">&nbsp;</p>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="field content-tab js-tabTxErc20 js-tabTxBasic js-tabSignMessage">
+          <div class="control">
+            <input type="hidden" id="txUnsignedHex" />
+            <input type="hidden" id="txSignedHex" />
+            <input type="hidden" id="txSignatureHex" />
+            <button type="submit" class="button is-info js-send-ble">
+                Sign via BLE
+                &nbsp;<i class="fab fa-bluetooth"></i>
+            </button>
+            <button type="submit" class="button is-success js-send-nfc">
+                Sign via NFC
+                &nbsp;<i style="display: inline-block; transform: rotate(90deg);" class="fas fa-wifi"></i>
+            </button>
+            <button id="scan-to-transmit" type="submit" class="button is-primary js-scan is-hidden js-qrscanner-trigger" data-target="txSignatureHex">
+                Scan to Transmit
+                <!--
+                &nbsp;<i class="fas fa-qrcode"></i>
+                -->
+            </button>
+            <button type="submit" class="button is-hidden js-cancel">
+                Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <section class="se2ction content-tab js-tabAuth">
+        <div class="container has-te2xt-centered">
+
+              <div class="b2ox has-t2ext-centered mb-4">
+              <p class="subtitle">Verify the authenticity of your device's firmware and hardware.</p>
+              <div class="image is-centered image-30">
+                  <!-- Placeholder for animation image -->
+                  <img src="./img/auth-animation.gif" alt="Unlock and navigate to menu animation">
+              </div>
+
+                  <p>To verify the authenticity of your device's firmware and hardware, select either NFC or Bluetooth. <br/>
+                    The server will generate a token, and your device will sign it. <br/>
+                    Once signed, your device will display a QR code. <br/><br/>
+
+                    After scanning the QR code from the device, you will be navigated to auth.hito.xyz to complete the authenticity check.
+                  </p>
+              </div>
+
+          <!-- Submit Button -->
+          <div class="field content-tab js-tabAuth">
+            <div class="control">
+              <input type="hidden" id="authURL" />
+              <button type="submit" class="button is-info js-auth-ble">
+                  Send via BLE
+                  &nbsp;<i class="fab fa-bluetooth"></i>
+              </button>
+              <button type="submit" class="button is-success js-auth-nfc">
+                  Send via NFC
+                  &nbsp;<i style="display: inline-block; transform: rotate(90deg);" class="fas fa-wifi"></i>
+              </button>
+              <button id="scan-to-complete" type="submit" class="button is-primary js-scan is-hidden js-qrscanner-trigger" data-target="authURL">
+                  Scan to Complete
+                  <!--
+                  &nbsp;<i class="fas fa-qrcode"></i>
+                  -->
+              </button>
+              <button type="submit" class="button is-hidden js-cancel">
+                  Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <div class="secti2on console-output is-small is-size-7 pt-4">
+        <pre><code class="json" id="log"></code></pre>
+      </div>
+    </div>
+
+  </section>
+
+
+
+    <!-- Modal Structure -->
+  <div id="video-modal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-content" style="width: 90%; margin: auto">
+      <!-- Video Element -->
+      <div id="qr-reader" style="width: 100%; height: auto;"></div>
+    </div>
+    <button class="modal-close is-large" aria-label="close"></button>
+  </div>
+
+  <div id="tx-modal" class="modal">
+    <div class="modal-background"></div>
+    <div class="modal-card p-4">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Send to <b></b></p>
+        <button class="delete" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body pb-0 pt-1">
+        <!-- Content ... -->
+        <div class="b2ox is-small is-size-7 m-0">
+          <pre class="p-0 m-0 has-background-white">
+            <code class="json p-0 has-background-white"></code>
+          </pre>
+        </div>
+      </section>
+      <footer class="modal-card-foot">
+        <div class="buttons">
+          <button id="send-transaction" class="button is-success is-small">Send to Chain</button>
+          <button class="button is-small">Cancel</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+</div>
+
+
+  <!-- Custom JS to handle tabs, populate networks, and tokens -->
+  <script>
+    $(document).ready(function() {
+      // Tab functionality
+      var selectedTab = false; 
+
+      $('.tabs ul li').click(function() {
+        var tab_id = $(this).attr('data-tab');
+
+        $('.tabs ul li').removeClass('is-active');
+        $('.content-tab').addClass('is-hidden');
+
+        $(this).addClass('is-active');
+        $("." + tab_id).removeClass('is-hidden');
+
+        localStorage.setItem('selectedTab', tab_id);
+      });
+
+      if (localStorage.getItem('selectedTab') !== null) {
+        selectedTab = localStorage.getItem('selectedTab');
+      }
+      //if (selectedTab === "js-tabTxErc20") {
+      //if (selectedTab) {
+        $(`.tabs ul li[data-tab=${selectedTab}`).click();
+      //} else {
+       // $(`.tabs ul li[data-tab=${selectedTab}`).click();
+      //}
+    });
+  </script>
+
+</body>
+
+</html>
+
