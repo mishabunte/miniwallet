@@ -442,6 +442,9 @@ title: Mini Wallet | Hito
       if (localStorage.getItem('selectedTab') !== null) {
         selectedTab = localStorage.getItem('selectedTab');
       }
+      if (!('js-tabTxErc20 js-tabTxBasic js-tabSignMessage js-tabAuth'.split(/\s/).includes(selectedTab))) {
+        selectedTab = 'js-tabTxBasic';
+      }
       //if (selectedTab === "js-tabTxErc20") {
       //if (selectedTab) {
         $(`.tabs ul li[data-tab=${selectedTab}`).click();
