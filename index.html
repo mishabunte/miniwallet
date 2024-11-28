@@ -92,6 +92,11 @@ title: Mini Wallet | Hito
       margin-top: -1em;
       margin-bottom: 0em;
     }
+    .icon-image {
+      height: 32px; /* Maintain aspect ratio */
+      width: auto; /* Set icon size */
+      cursor: pointer; /* Change cursor on hover */
+    }
 
   </style>
 </head>
@@ -104,6 +109,7 @@ title: Mini Wallet | Hito
         <span class="content-tab is-hidden js-tabTxBasic">Basic Transaction</span>
         <span class="content-tab is-hidden js-tabTxErc20">Token Transfer</span>
         <span class="content-tab is-hidden js-tabSignMessage">Sign Message</span>
+        <span class="content-tab is-loading"></span>
 
       </h1>
 
@@ -141,6 +147,17 @@ title: Mini Wallet | Hito
             <a>
               &nbsp;
               <i class="fas fa-cog"></i>
+              &nbsp;
+            </a>
+          </li>
+          -->
+          <!--
+          <li data-tab="js-tabWalletConnect" class="">
+            <a>
+              &nbsp;
+              <span class="icon">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Walletconnect-logo.png" class="icon-ima2ge" />
+              </span>
               &nbsp;
             </a>
           </li>
