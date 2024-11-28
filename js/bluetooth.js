@@ -60,7 +60,7 @@ async function _connectBluetooth() {
 
   //log('Requesting Bluetooth device...');
   device = await navigator.bluetooth.requestDevice({
-      filters: [{namePrefix: 'hito'}],
+      filters: [{namePrefix: 'hito'}, {namePrefix: 'Hito'}],
       optionalServices: [hitoServiceUuid],
   });
 
