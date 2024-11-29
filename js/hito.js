@@ -1,6 +1,9 @@
 function hito_sendRequest(r) {
 
   let payload = _createPayload(r);
+  if (typeof log === 'function') {
+    log(`deeplink: hito://transaction?payload=${payload}`);
+  }
 
   switch(r.media) {
     case 'nfc': 
