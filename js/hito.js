@@ -1,8 +1,17 @@
 function hito_sendRequest(r) {
 
   let payload = _createPayload(r);
+
+  let deeplink = `hito://transaction?payload=${payload}`;
   if (typeof log === 'function') {
-    log(`deeplink: hito://transaction?payload=${payload}`);
+    log(`deeplink: ${deeplink}`);
+  }
+  if (typeof document !== "undefined") {
+    const hitoDeepLink = document.getElementById("hitoDeepLink");
+    if (hitoDeepLink) {
+      hitoDeepLink.textContent = deeplink;
+      hitoDeepLink.href = deeplink;
+    }
   }
 
   switch(r.media) {
