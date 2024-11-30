@@ -3,6 +3,7 @@ function hito_sendRequest(r) {
   let payload = _createPayload(r);
 
   let deeplink = `hito://transaction?payload=${payload}`;
+  let httpslink = `https://nfc.hito.xyz/?payload=${payload}`;
   if (typeof log === 'function') {
     log(`deeplink: ${deeplink}`);
   }
@@ -11,6 +12,11 @@ function hito_sendRequest(r) {
     if (hitoDeepLink) {
       hitoDeepLink.textContent = deeplink;
       hitoDeepLink.href = deeplink;
+    }
+    const hitoHttpsLink = document.getElementById("hitoHttpsLink");
+    if (hitoHttpsLink) {
+      hitoHttpsLink.textContent = httpslink;
+      hitoHttpsLink.href = httpslink;
     }
   }
 
